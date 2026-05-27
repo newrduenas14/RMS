@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hotel Mis Sueños</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<!-- ══ LOGIN ════════════════════════════════════════════════════ -->
+<div id="screen-login" class="screen active shell-bg">
+    <div class="login-frame">
+        <section class="login-hero">
+            <div class="login-hero-top">
+                <div class="eyebrow">Acceso interno · Hotel boutique</div>
+                <div class="login-rule"></div>
+                <div class="login-brand-mark">Hotel<br>Mis Sueños</div>
+                <p class="login-copy" style="margin-top:20px;">Plataforma privada para la operación diaria del hotel. Entra con tu usuario para ver solo los módulos autorizados.</p>
+            </div>
+            <div class="login-hero-bottom">
+                <div class="login-mini"><strong>Accesos por usuario</strong><span>Cada persona ve únicamente sus módulos y pestañas permitidas.</span></div>
+                <div class="login-mini"><strong>Operación centralizada</strong><span>Inventario, caja, mantenimiento e ingresos en un sistema ordenado.</span></div>
+            </div>
+        </section>
+        <section class="login-card">
+            <div class="login-rule"></div>
+            <h1 class="login-hotel">Bienvenido</h1>
+            <p class="login-subtitle">Sistema de gestión</p>
+            <p class="login-copy">Ingresa con tu usuario y contraseña. Tu Mac puede guardar estos datos y rellenarlos con Touch ID.</p>
+            <form id="login-form" onsubmit="tryLogin(); return false;">
+                <div class="login-field">
+                    <label class="login-label" for="login-username">Usuario</label>
+                    <input class="login-input" type="text" id="login-username" name="username" autocomplete="username" placeholder="Mis Sueños">
+                </div>
+                <div class="login-field">
+                    <label class="login-label" for="login-password">Contraseña</label>
+                    <input class="login-input" type="password" id="login-password" name="password" autocomplete="current-password" placeholder="••••••••••••••">
+                </div>
+                <button class="login-btn" id="login-submit-btn" type="submit">Entrar al sistema</button>
+            </form>
+            <p class="login-error" id="login-error"></p>
+            <div class="login-footer-note">Acceso restringido para uso interno.</div>
+        </section>
+    </div>
+</div>
+
+<!-- ══ APP SIDEBAR / TOPBAR ════════════════════════════════════ -->
+<div id="app-sidebar-overlay" class="app-sidebar-overlay" onclick="closeSidebar()"></div>
+<aside id="app-sidebar" class="app-sidebar">
+    <div class="app-sidebar-head">
+        <div>
+            <div class="eyebrow">Usuario activo</div>
+            <div class="app-user-name" id="sidebar-user-name">—</div>
+            <div class="app-user-role" id="sidebar-user-role">—</div>
+        </div>
+        <button class="app-sidebar-close" onclick="closeSidebar()">×</button>
+    </div>
+    <div class="app-sidebar-section">
+        <div class="app-sidebar-label">Módulos disponibles</div>
+        <nav id="sidebar-modules" class="app-sidebar-nav"></nav>
+    </div>
+    <div class="app-sidebar-section app-admin-section" id="sidebar-admin-section" style="display:none;">
+        <div class="app-sidebar-label">Administración</div>
+        <button class="app-sidebar-link" onclick="goTo('users')"><span class="app-sidebar-code">USR</span><span>Usuarios y permisos</span></button>
+    </div>
+    <div class="app-sidebar-footer">
+        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    </div>
+</aside>
+<header id="app-topbar" class="app-topbar">
+    <button class="app-menu-btn" onclick="openSidebar()" aria-label="Abrir menú">☰</button>
+    <div>
+        <div class="home-title">Hotel Mis Sueños</div>
+        <div class="home-sub" id="app-current-module">Centro de control</div>
+    </div>
+    <div class="app-topbar-right">
+        <span class="chip" id="topbar-user-chip">Usuario: —</span>
+    </div>
+</header>
+
+<!-- ══ USERS / ADMIN ═══════════════════════════════════════════ -->
+<div id="screen-users" class="screen">
+    <main class="page-main app-page-with-topbar">
+        <section class="section-block">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">Usuarios y permisos</div>
+                    <div class="section-note">Crear usuarios y asignar acceso por módulo y pestaña</div>
+                </div>
+                <button class="btn" onclick="loadUsersAdmin()" style="min-height:38px;padding:0 16px;font-size:11px;">↻ Actualizar</button>
+            </div>
+            <div class="info-box" style="margin-bottom:16px;"><strong>Nota:</strong> el usuario inicial es Angel / Angel14. Desde aquí puedes crear usuarios nuevos y decidir qué módulos y pestañas pueden ver.</div>
+            <div class="cash-two-col-even">
+                <section class="breakfast-box">
+                    <div class="breakfast-head"><div><div class="breakfast-title">Crear usuario</div><div class="breakfast-copy">El nuevo usuario podrá iniciar sesión con los módulos seleccionados.</div></div></div>
+                    <div class="cash-form-grid">
+                        <div class="cash-field"><label for="new-user-name">Nombre</label><input id="new-user-name" class="breakfast-input" autocomplete="name" placeholder="Ej. Recepción"></div>
+                        <div class="cash-field"><label for="new-user-username">Usuario</label><input id="new-user-username" class="breakfast-input" autocomplete="username" placeholder="Ej. recepcion"></div>
+                        <div class="cash-field"><label for="new-user-password">Contraseña</label><input id="new-user-password" type="password" class="breakfast-input" autocomplete="new-password" placeholder="Nueva contraseña"></div>
+                        <div class="cash-field"><label for="new-user-role">Rol</label><select id="new-user-role" class="breakfast-select"><option value="ops">Operación</option><option value="finance">Finanzas</option><option value="admin">Admin</option></select></div>
+                    </div>
+                    <div class="module-permissions-box" id="new-user-modules"></div>
+                    <div class="cash-actions"><button class="btn" onclick="createUserFromForm()" style="min-height:38px;padding:0 16px;font-size:11px;">Crear usuario</button></div>
+                    <div id="users-form-status" class="breakfast-status"></div>
+                </section>
+                <section class="section-block">
+                    <div class="section-header"><div><div class="section-title">Usuarios actuales</div><div class="section-note">Activos e inactivos</div></div></div>
+                    <div id="users-list"><div class="rev-no-data">Cargando usuarios...</div></div>
+                </section>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- ══ WELCOME ═════════════════════════════════════════════════ -->
+<div id="screen-home" class="screen">
+    <main class="page-main app-page-with-topbar">
+        <section class="welcome-panel section-block">
+            <div class="eyebrow">Panel interno</div>
+            <h1 class="welcome-title">Bienvenido, <span id="welcome-user-name">Angel</span></h1>
+            <p class="welcome-copy">
+                Este es tu centro de control de Hotel Mis Sueños. Para comenzar, abre el menú lateral con el botón ☰ en la esquina superior izquierda y selecciona el módulo que quieres usar.
+            </p>
+            <p class="welcome-copy" style="margin-top:10px;">
+                Solo verás los módulos y pestañas autorizadas para tu usuario. Si necesitas otro acceso, un administrador puede asignarlo desde Usuarios y permisos.
+            </p>
+            <div class="welcome-meta">
+                <span class="chip" id="welcome-role-chip">Rol: —</span>
+                <span class="chip" id="welcome-date-chip">—</span>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- &#9552;&#9552; INVENTORY &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552; -->
+
+    <div id="screen-inventory" class="screen">
+        <header class="inner-header">
+            <div class="inner-header-inner">
+                <div class="inner-heading">
+                    <button class="back-btn" onclick="goTo('home')">&#8592; Regresar</button>
+                    <div>
+                        <div class="inner-title">Inventario</div>
+                        <div class="inner-sub">Per&#237;odo fijo &#183; P = 7 d&#237;as &#183; L = 2 d&#237;as &#183; Safety 20%</div>
+                    </div>
+                </div>
+                <div class="inner-info">
+                    <span class="chip">M&#243;dulo principal</span>
+                </div>
+            </div>
+        </header>
+        <main class="page-main">
+            <div class="inv-top-tabs">
+                <button class="inv-tab-btn active" onclick="switchInventoryTab('overview',this)">Resumen</button>
+                <button class="inv-tab-btn" onclick="switchInventoryTab('details',this)">Detalles de productos</button>
+                <button class="inv-tab-btn" onclick="switchInventoryTab('inputs',this)">Capturas</button>
+            </div>
+
+            <div class="inv-tab-panel active" id="inventory-panel-overview">
+                <section class="stats">
+                    <div class="stat">
+                        <span class="stat-n" id="stat-total">&#8212;</span>
+                        <span class="stat-l">Productos</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-n text-ok" id="stat-ok">&#8212;</span>
+                        <span class="stat-l">Nivel OK</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-n text-low" id="stat-low">&#8212;</span>
+                        <span class="stat-l">Stock Bajo</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-n text-crit" id="stat-crit">&#8212;</span>
+                        <span class="stat-l">Cr&#237;tico</span>
+                    </div>
+                </section>
+                <section class="cost-summary">
+                    <div class="cost-card">
+                        <div class="cost-label">Costo total estimado del pedido</div>
+                        <div class="cost-amount" id="cost-total">$&#8212;</div>
+                        <div class="cost-sub">Basado en los &#250;ltimos precios unitarios registrados.</div>
+                    </div>
+                    <div class="cost-card">
+                        <div class="cost-label">Productos con precio conocido</div>
+                        <div class="cost-amount" id="cost-known">&#8212;</div>
+                        <div class="cost-sub">
+                            de 
+                            <span id="cost-total-products">&#8212;</span>
+                             productos sugeridos para pedir.
+                        </div>
+                    </div>
+                    <div class="cost-card">
+                        <div class="cost-label">Productos sin precio registrado</div>
+                        <div class="cost-amount text-low" id="cost-unknown">&#8212;</div>
+                        <div class="cost-sub">El costo real final podr&#237;a ser mayor.</div>
+                    </div>
+                </section>
+                <section class="section-block">
+                    <div class="section-header">
+                        <div>
+                            <div class="section-title">Resumen por categor&#237;a</div>
+                            <div class="section-note">Resumen r&#225;pido del mismo inventario maestro</div>
+                        </div>
+                        <span class="section-note" id="last-refresh"></span>
+                    </div>
+                    <div class="inv-category-grid" id="inventory-category-grid">
+                        <div class="rev-no-data">Cargando categor&#237;as...</div>
+                    </div>
+                </section>
+                <section class="info-box">
+                    <strong>Modelo P &#8212; Per&#237;odo fijo:</strong>
+                     revisi&#243;n cada 
+                    <strong>7 d&#237;as</strong>
+                     y entrega en 
+                    <strong>2 d&#237;as</strong>
+                    .
+                                    La cantidad sugerida se calcula como: 
+                    <strong>(Uso diario &#215; 9 d&#237;as) &#215; 1.20 &#8722; Stock actual</strong>
+                    .
+                                
+                </section>
+                <section class="section-block">
+                    <div class="section-header">
+                        <div>
+                            <div class="section-title">Lista maestra de inventario</div>
+                        </div>
+                        <span class="section-note">Tabla detallada</span>
+                    </div>
+                    <div class="table-shell">
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Categor&#237;a</th>
+                                        <th>Unidad</th>
+                                        <th>Stock Actual</th>
+                                        <th>Nivel par</th>
+                                        <th>Uso Diario Est.</th>
+                                        <th>Pedir Esta Semana</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Costo Estimado</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-body">
+                                    <tr>
+                                        <td colspan="10" class="loading">Cargando datos del inventario...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="inv-tab-panel" id="inventory-panel-details">
+                <section class="section-block">
+                    <div class="section-header">
+                        <div>
+                            <div class="section-title">Detalles de productos</div>
+                            <div class="section-note">Las mismas m&#233;tricas del inventario maestro, ahora en tarjetas</div>
+                        </div>
+                    </div>
+                    <div class="filters" style="margin-bottom:16px;" id="inventory-category-filters">
+                        <button class="filter-btn active" onclick="filterCat('all',this)">Todos</button>
+                        <button class="filter-btn" onclick="filterCat('Alimentos',this)">Alimentos</button>
+                        <button class="filter-btn" onclick="filterCat('Limpieza',this)">Limpieza</button>
+                        <button class="filter-btn" onclick="filterCat('Amenidades',this)">Amenidades</button>
+                        <button class="filter-btn" onclick="filterCat('Bebidas',this)">Bebidas</button>
+                        <button class="filter-btn" onclick="filterCat('Suministros',this)">Suministros</button>
+                        <button class="filter-btn" onclick="filterCat('Mantenimiento',this)">Mantenimiento</button>
+                    </div>
+                    <div class="inv-cards-grid" id="inventory-cards">
+                        <div class="rev-no-data">Cargando productos...</div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="inv-tab-panel" id="inventory-panel-inputs">
+                <div class="inv-inputs-grid">
+                    <section class="breakfast-box">
+                        <div class="breakfast-head">
+                            <div>
+                                <div class="breakfast-title">Registrar movimiento</div>
+                                <div class="breakfast-copy">Registra compras o usos manuales en Transacciones. El producto llena autom&#225;ticamente su unidad desde Inventario.</div>
+                            </div>
+                            <span class="chip">Compras / Uso</span>
+                        </div>
+                        <div class="input-form-grid">
+                            <div class="input-field span-3">
+                                <label for="purchase-type">Tipo</label>
+                                <select id="purchase-type" class="breakfast-select" onchange="onInventoryTypeChange()">
+                                    <option value="compras">Compra</option>
+                                    <option value="uso">Uso</option>
+                                </select>
+                            </div>
+                            <div class="input-field span-5">
+                                <label for="purchase-product">Producto</label>
+                                <select id="purchase-product" class="breakfast-select" onchange="onPurchaseProductChange()">
+                                    <option value="">Selecciona un producto...</option>
+                                </select>
+                            </div>
+                            <div class="input-field span-2">
+                                <label for="purchase-unit">Unidad</label>
+                                <input type="text" id="purchase-unit" class="breakfast-input" placeholder="Unidad" readonly>
+                            </div>
+                            <div class="input-field span-2">
+                                <label for="purchase-qty">Cantidad</label>
+                                <input type="number" id="purchase-qty" class="breakfast-input" placeholder="Cantidad" min="0" step="0.01">
+                            </div>
+                            <div class="input-field span-3 movement-purchase-only">
+                                <label for="purchase-total">Monto total</label>
+                                <input type="number" id="purchase-total" class="breakfast-input" placeholder="Total pagado" min="0" step="0.01">
+                            </div>
+                            <div class="input-field span-3 movement-purchase-only">
+                                <label for="purchase-supplier">Proveedor</label>
+                                <input type="text" id="purchase-supplier" class="breakfast-input" placeholder="Ej. Sams, Chedraui">
+                            </div>
+                            <div class="input-field span-3 movement-use-only" style="display:none;">
+                                <label for="purchase-where">D&#243;nde se us&#243;</label>
+                                <input type="text" id="purchase-where" class="breakfast-input" placeholder="Ej. Cocina, limpieza">
+                            </div>
+                            <div class="input-field span-3">
+                                <label for="purchase-date">Fecha</label>
+                                <input type="date" id="purchase-date" class="breakfast-input">
+                            </div>
+                            <div class="input-field span-6">
+                                <label for="purchase-notes">Notas</label>
+                                <input type="text" id="purchase-notes" class="breakfast-input" placeholder="Notas opcionales">
+                            </div>
+                            <div class="input-action">
+                                <button class="breakfast-btn" id="purchase-submit-btn" onclick="logPurchase()">Registrar compra</button>
+                            </div>
+                        </div>
+                        <div id="purchase-status" class="breakfast-status"></div>
+                    </section>
+
+                    <section class="breakfast-box">
+                        <div class="breakfast-head">
+                            <div>
+                                <div class="breakfast-title">Registrar desayuno</div>
+                                <div class="breakfast-copy">Registra porciones servidas y el sistema descuenta autom&#225;ticamente los ingredientes configurados en Recetas.</div>
+                            </div>
+                            <span class="chip">Desayunos</span>
+                        </div>
+                        <div class="input-form-grid">
+                            <div class="input-field span-6">
+                                <label for="breakfast-dish">Platillo</label>
+                                <select id="breakfast-dish" class="breakfast-select">
+                                    <option value="">Cargando platillos...</option>
+                                </select>
+                            </div>
+                            <div class="input-field span-3">
+                                <label for="breakfast-portions">Porciones</label>
+                                <input type="number" id="breakfast-portions" class="breakfast-input" placeholder="Ej. 10" min="1" max="100">
+                            </div>
+                            <div class="input-field span-3">
+                                <label for="breakfast-date">Fecha</label>
+                                <input type="date" id="breakfast-date" class="breakfast-input">
+                            </div>
+                            <div class="input-action">
+                                <button class="breakfast-btn" id="breakfast-submit-btn" onclick="logBreakfast()">Registrar desayuno</button>
+                            </div>
+                        </div>
+                        <div id="breakfast-status" class="breakfast-status"></div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<!-- &#9552;&#9552; MAINTENANCE &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552; -->
+    <div id="screen-maintenance" class="screen">
+        <header class="inner-header">
+            <div class="inner-header-inner">
+                <div class="inner-heading">
+                    <button class="back-btn" onclick="goTo('home')">&#8592; Regresar</button>
+                    <div>
+                        <div class="inner-title">Mantenimiento</div>
+                        <div class="inner-sub">Historial &#183; pr&#243;ximas fechas &#183; registro por &#225;rea</div>
+                    </div>
+                </div>
+                <div class="inner-info">
+                    <span class="chip">Seguimiento t&#233;cnico</span>
+                </div>
+            </div>
+        </header>
+        <main class="page-main">
+            <section class="stats">
+                <div class="stat">
+                    <span class="stat-n" id="mstat-total">&#8212;</span>
+                    <span class="stat-l">Total &#237;tems</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-n text-ok" id="mstat-ok">&#8212;</span>
+                    <span class="stat-l">OK</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-n text-low" id="mstat-soon">&#8212;</span>
+                    <span class="stat-l">Pronto</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-n text-crit" id="mstat-overdue">&#8212;</span>
+                    <span class="stat-l">Vencido / Sin registro</span>
+                </div>
+            </section>
+            <section class="breakfast-box">
+                <div class="breakfast-head">
+                    <div>
+                        <div class="breakfast-title">Registrar mantenimiento</div>
+                        <div class="breakfast-copy">Guarda intervenciones por &#225;rea, &#237;tem, fecha y responsable para actualizar el pr&#243;ximo servicio programado.</div>
+                    </div>
+                    <span class="chip">Registro operativo</span>
+                </div>
+                <div class="maint-grid">
+                    <select id="maint-area" class="breakfast-select" onchange="updateMaintItems()">
+                        <option value="">&#193;rea...</option>
+                        <option>Room 01</option>
+                        <option>Room 02</option>
+                        <option>Room 03</option>
+                        <option>Room 04</option>
+                        <option>Room 05</option>
+                        <option>Room 06</option>
+                        <option>Room 07</option>
+                        <option>Room 08</option>
+                        <option>Room 09</option>
+                        <option>Room 10</option>
+                        <option>Room 11</option>
+                        <option>Room 12</option>
+                        <option>Room 13</option>
+                        <option>Room 14</option>
+                        <option>Room 15</option>
+                        <option>Room 16</option>
+                        <option>Room 17</option>
+                        <option>Pool</option>
+                        <option>Restaurant</option>
+                        <option>Laundry Room</option>
+                        <option>Common Areas</option>
+                    </select>
+                    <select id="maint-item" class="breakfast-select">
+                        <option value="">Selecciona &#225;rea primero...</option>
+                    </select>
+                    <input type="text" id="maint-doneby" class="breakfast-input" placeholder="Hecho por">
+                    <input type="date" id="maint-date" class="breakfast-input">
+                    <button class="breakfast-btn" id="maintenance-submit-btn" onclick="logMaintenance()">Registrar</button>
+                </div>
+                <div class="maint-notes-row">
+                    <input type="text" id="maint-notes" class="breakfast-input" placeholder="Notas (opcional)">
+                </div>
+                <div id="maint-status" class="breakfast-status"></div>
+            </section>
+            <section class="section-block">
+                <div class="section-header">
+                    <div class="section-title">Estado del mantenimiento</div>
+                    <span class="section-note" id="maint-refresh"></span>
+                </div>
+                <div class="filters" id="maint-status-filters" style="margin-bottom:10px;">
+                    <button class="filter-btn active" onclick="filterMaint('all',this)">Todos</button>
+                    <button class="filter-btn" onclick="filterMaint('overdue',this)">Vencido</button>
+                    <button class="filter-btn" onclick="filterMaint('due_soon',this)">Pronto</button>
+                    <button class="filter-btn" onclick="filterMaint('ok',this)">OK</button>
+                    <button class="filter-btn" onclick="filterMaint('never',this)">Sin registro</button>
+                </div>
+                <div class="filters" id="area-filters" style="margin-bottom:16px;">
+                    <button class="filter-btn active" onclick="filterMaintArea('all',this)">Todas las &#225;reas</button>
+                    <button class="filter-btn" onclick="filterMaintArea('Room',this)">Habitaciones</button>
+                    <button class="filter-btn" onclick="filterMaintArea('Pool',this)">Alberca</button>
+                    <button class="filter-btn" onclick="filterMaintArea('Restaurant',this)">Restaurante</button>
+                    <button class="filter-btn" onclick="filterMaintArea('Laundry Room',this)">Lavander&#237;a</button>
+                    <button class="filter-btn" onclick="filterMaintArea('Common Areas',this)">&#193;reas comunes</button>
+                </div>
+                <div class="table-shell">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>&#193;rea</th>
+                                    <th>Item</th>
+                                    <th>Cada</th>
+                                    <th>&#218;ltimo Mantenimiento</th>
+                                    <th>Pr&#243;xima Fecha</th>
+                                    <th>Hecho por</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="maintenance-body">
+                                <tr>
+                                    <td colspan="7" class="loading">Cargando mantenimiento...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<!-- &#9552;&#9552; CAJA RECEPCI&#211;N &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552; -->
+    <div id="screen-cash" class="screen">
+        <header class="inner-header">
+            <div class="inner-header-inner">
+                <div class="inner-heading">
+                    <button class="back-btn" onclick="goTo('home')">&#8592; Regresar</button>
+                    <div>
+                        <div class="inner-title">Caja Recepci&#243;n</div>
+                        <div class="inner-sub">Control diario &#183; Caja f&#237;sica &#183; Banco registrado</div>
+                    </div>
+                </div>
+                <div class="inner-info">
+                    <span class="chip" id="cash-role-chip">Rol: recepci&#243;n</span>
+                    <span class="chip" id="cash-user-chip">Usuario: &#8212;</span>
+                    <span class="chip" id="cash-date-chip">Hoy</span>
+                </div>
+            </div>
+        </header>
+        <main class="page-main">
+            <div class="cash-tabs">
+                <button class="cash-tab active" onclick="cashTab('today',this)">Caja de hoy</button>
+                <button class="cash-tab" onclick="cashTab('close',this)">Cierre del d&#237;a</button>
+                <button class="cash-tab cash-admin-only" onclick="cashTab('finance',this)">Vista finanzas</button>
+            </div>
+            <div id="cash-error-box" style="display:none;"></div>
+
+            <div class="cash-panel active" id="cashpanel-today">
+                <section class="stats">
+                    <div class="stat">
+                        <span class="stat-n" id="cash-saldo-inicial">&#8212;</span>
+                        <span class="stat-l">Saldo inicial</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-n text-ok" id="cash-entradas-caja">&#8212;</span>
+                        <span class="stat-l">Entradas en caja</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-n text-crit" id="cash-gastos-caja">&#8212;</span>
+                        <span class="stat-l">Gastos en caja</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-n" id="cash-balance-caja">&#8212;</span>
+                        <span class="stat-l">Balance de caja registrado</span>
+                    </div>
+                </section>
+
+                <div class="cash-two-col">
+                    <section class="breakfast-box">
+                        <div class="breakfast-head">
+                            <div>
+                                <div class="breakfast-title">Registrar movimiento</div>
+                                <div class="breakfast-copy">Captura movimientos de caja o banco. Recepci&#243;n registra banco, pero no ve balance bancario.</div>
+                            </div>
+                            <span class="chip" id="cash-open-chip">Caja abierta</span>
+                        </div>
+                        <div class="info-box" style="margin-bottom:16px;">
+                            <strong>Regla:</strong>
+                             recepci&#243;n solo puede capturar movimientos de hoy. Finanzas puede capturar fechas pasadas o actuales desde la vista admin.
+                                                
+                        </div>
+                        <div class="cash-form-grid">
+                            <div class="cash-field">
+                                <label for="cash-account">Cuenta</label>
+                                <select id="cash-account" class="breakfast-select">
+                                    <option value="caja">Caja recepci&#243;n</option>
+                                    <option value="banco">Banco registrado</option>
+                                </select>
+                            </div>
+                            <div class="cash-field">
+                                <label for="cash-movement">Movimiento</label>
+                                <select id="cash-movement" class="breakfast-select">
+                                    <option value="entrada">Entrada</option>
+                                    <option value="gasto">Gasto</option>
+                                </select>
+                            </div>
+                            <div class="cash-field">
+                                <label for="cash-type">Tipo</label>
+                                <select id="cash-type" class="breakfast-select">
+                                    <option>RESERVA</option>
+                                    <option>DEPOSITO</option>
+                                    <option>RESTAURANTE</option>
+                                    <option>LAVANDERIA</option>
+                                    <option>MANTENIMIENTO</option>
+                                    <option>NOMINAS</option>
+                                    <option>GASTOS OPERATIVOS</option>
+                                </select>
+                            </div>
+                            <div class="cash-field">
+                                <label for="cash-amount">Monto</label>
+                                <input id="cash-amount" type="number" class="breakfast-input" placeholder="Ej. 1500" min="0" step="0.01">
+                            </div>
+                            <div class="cash-field full">
+                                <label for="cash-concept">Concepto</label>
+                                <input id="cash-concept" type="text" class="breakfast-input" placeholder="Ej. Anticipo reserva, pago lavander&#237;a, compra operativa">
+                            </div>
+                            <div class="cash-field full">
+                                <label for="cash-user-fixed">Registrado por</label>
+                                <input id="cash-user-fixed" type="text" class="breakfast-input" value="&#8212;" readonly>
+                            </div>
+                        </div>
+                        <div class="cash-actions">
+                            <button class="btn-outline btn" onclick="clearCashForm()" style="min-height:38px;padding:0 16px;font-size:11px;">Limpiar</button>
+                            <button class="btn" id="cash-submit-btn" onclick="submitCashMovement()" style="min-height:38px;padding:0 16px;font-size:11px;">Registrar movimiento</button>
+                        </div>
+                        <div id="cash-form-status" class="breakfast-status"></div>
+                    </section>
+
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Movimientos de hoy</div>
+                                <div class="section-note">Recepci&#243;n no ve movimientos de d&#237;as anteriores.</div>
+                            </div>
+                            <span class="chip" id="cash-today-count">&#8212;</span>
+                        </div>
+                        <div class="table-shell">
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Hora</th>
+                                            <th>Cuenta</th>
+                                            <th>Tipo</th>
+                                            <th>Concepto</th>
+                                            <th>Monto</th>
+                                            <th>Estado</th>
+                                            <th>Acci&#243;n</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cash-today-body">
+                                        <tr>
+                                            <td colspan="7" class="loading">Cargando caja...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <div class="cash-panel" id="cashpanel-close">
+                <section class="section-block">
+                    <div class="section-header">
+                        <div>
+                            <div class="section-title">Cierre de caja del d&#237;a</div>
+                            <div class="section-note">Despu&#233;s de cerrar, recepci&#243;n ya no puede agregar ni cancelar movimientos hasta ma&#241;ana.</div>
+                        </div>
+                    </div>
+                    <div class="cash-two-col-even">
+                        <div class="cash-warning-box">
+                            <strong>Warning:</strong>
+                             esta acci&#243;n debe usarse solo al final del turno/d&#237;a. Para confirmar, el sistema pedir&#225; escribir 
+                            <strong>cerrar</strong>
+                            . Finanzas podr&#225; seguir viendo y auditando el cierre.
+                                                
+                        </div>
+                        <div class="cash-closed-state">
+                            <div>
+                                <strong id="cash-close-title">Cierre pendiente</strong>
+                                <span id="cash-close-summary">Cargando resumen...</span>
+                            </div>
+                            <button class="btn-reject" id="cash-close-btn" onclick="closeCashDay()">Cerrar caja</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="cash-panel cash-admin-block" id="cashpanel-finance">
+                <section class="section-block">
+                    <div class="section-header">
+                        <div>
+                            <div class="section-title">Vista finanzas</div>
+                            <div class="section-note">Modo admin &#183; historial completo &#183; banco &#183; cierres &#183; m&#233;tricas</div>
+                        </div>
+                        <span class="chip">Admin / Finanzas</span>
+                    </div>
+                    <section class="finance-summary-grid" style="margin-bottom:18px;">
+                        <div class="finance-summary-card">
+                            <div class="rev-mini-label">Entradas &#250;ltimos 7 d&#237;as</div>
+                            <div class="rev-mini-value text-ok" id="cash-fin-in-7">&#8212;</div>
+                            <div class="rev-mini-sub">Caja + banco, excluye cancelados.</div>
+                        </div>
+                        <div class="finance-summary-card">
+                            <div class="rev-mini-label">Gastos &#250;ltimos 7 d&#237;as</div>
+                            <div class="rev-mini-value text-crit" id="cash-fin-out-7">&#8212;</div>
+                            <div class="rev-mini-sub">Caja + banco, excluye cancelados.</div>
+                        </div>
+                        <div class="finance-summary-card">
+                            <div class="rev-mini-label">Balance banco registrado</div>
+                            <div class="rev-mini-value" id="cash-fin-bank-balance">&#8212;</div>
+                            <div class="rev-mini-sub">Visible solo para finanzas.</div>
+                        </div>
+                        <div class="finance-summary-card">
+                            <div class="rev-mini-label">Cierre caja seleccionado</div>
+                            <div class="rev-mini-value" id="cash-fin-close-balance">&#8212;</div>
+                            <div class="rev-mini-sub" id="cash-fin-close-sub">Selecciona una fecha.</div>
+                        </div>
+                    </section>
+
+                    <div class="cash-two-col-even" style="margin-bottom:18px;">
+                        <section class="breakfast-box">
+                            <div class="breakfast-head">
+                                <div>
+                                    <div class="breakfast-title">Filtros</div>
+                                    <div class="breakfast-copy">Consulta movimientos por d&#237;a, cuenta, tipo y estado.</div>
+                                </div>
+                            </div>
+                            <div class="cash-form-grid">
+                                <div class="cash-field">
+                                    <label for="cash-fin-date">Fecha</label>
+                                    <input id="cash-fin-date" type="date" class="breakfast-input" onchange="loadCashAdminDate()">
+                                </div>
+                                <div class="cash-field">
+                                    <label for="cash-fin-account">Cuenta</label>
+                                    <select id="cash-fin-account" class="breakfast-select" onchange="renderCashFinance()">
+                                        <option value="all">Todas</option>
+                                        <option value="caja">Caja recepci&#243;n</option>
+                                        <option value="banco">Banco</option>
+                                    </select>
+                                </div>
+                                <div class="cash-field">
+                                    <label for="cash-fin-type">Tipo</label>
+                                    <select id="cash-fin-type" class="breakfast-select" onchange="renderCashFinance()">
+                                        <option value="all">Todos</option>
+                                        <option>RESERVA</option>
+                                        <option>DEPOSITO</option>
+                                        <option>RESTAURANTE</option>
+                                        <option>LAVANDERIA</option>
+                                        <option>MANTENIMIENTO</option>
+                                        <option>NOMINAS</option>
+                                        <option>GASTOS OPERATIVOS</option>
+                                    </select>
+                                </div>
+                                <div class="cash-field">
+                                    <label for="cash-fin-status-filter">Estado</label>
+                                    <select id="cash-fin-status-filter" class="breakfast-select" onchange="renderCashFinance()">
+                                        <option value="active">Solo activos</option>
+                                        <option value="all">Todos</option>
+                                        <option value="cancelado">Cancelados</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="cash-actions">
+                                <button class="btn-outline btn" onclick="cashShiftAdminDate(-1)" style="min-height:38px;padding:0 16px;font-size:11px;">D&#237;a anterior</button>
+                                <button class="btn-outline btn" onclick="cashShiftAdminDate(0)" style="min-height:38px;padding:0 16px;font-size:11px;">Hoy</button>
+                                <button class="btn" onclick="loadCashAdminDate()" style="min-height:38px;padding:0 16px;font-size:11px;">Aplicar filtros</button>
+                            </div>
+                        </section>
+                        <section class="breakfast-box">
+                            <div class="breakfast-head">
+                                <div>
+                                    <div class="breakfast-title">Agregar movimiento admin</div>
+                                    <div class="breakfast-copy">Finanzas puede capturar fechas pasadas o actuales. No se permiten fechas futuras.</div>
+                                </div>
+                            </div>
+                            <div class="cash-form-grid">
+                                <div class="cash-field">
+                                    <label for="cash-admin-date">Fecha</label>
+                                    <input id="cash-admin-date" type="date" class="breakfast-input">
+                                </div>
+                                <div class="cash-field">
+                                    <label for="cash-admin-account">Cuenta</label>
+                                    <select id="cash-admin-account" class="breakfast-select">
+                                        <option value="caja">Caja recepci&#243;n</option>
+                                        <option value="banco">Banco</option>
+                                    </select>
+                                </div>
+                                <div class="cash-field">
+                                    <label for="cash-admin-movement">Movimiento</label>
+                                    <select id="cash-admin-movement" class="breakfast-select">
+                                        <option value="entrada">Entrada</option>
+                                        <option value="gasto">Gasto</option>
+                                    </select>
+                                </div>
+                                <div class="cash-field">
+                                    <label for="cash-admin-type">Tipo</label>
+                                    <select id="cash-admin-type" class="breakfast-select">
+                                        <option>RESERVA</option>
+                                        <option>DEPOSITO</option>
+                                        <option>RESTAURANTE</option>
+                                        <option>LAVANDERIA</option>
+                                        <option>MANTENIMIENTO</option>
+                                        <option>NOMINAS</option>
+                                        <option>GASTOS OPERATIVOS</option>
+                                    </select>
+                                </div>
+                                <div class="cash-field">
+                                    <label for="cash-admin-amount">Monto</label>
+                                    <input id="cash-admin-amount" type="number" class="breakfast-input" min="0" step="0.01">
+                                </div>
+                                <div class="cash-field">
+                                    <label for="cash-admin-user">Registrado por</label>
+                                    <input id="cash-admin-user" type="text" class="breakfast-input" readonly>
+                                </div>
+                                <div class="cash-field full">
+                                    <label for="cash-admin-concept">Concepto</label>
+                                    <input id="cash-admin-concept" type="text" class="breakfast-input" placeholder="Concepto del movimiento">
+                                </div>
+                            </div>
+                            <div class="cash-actions">
+                                <button class="btn" onclick="submitCashAdminMovement()" style="min-height:38px;padding:0 16px;font-size:11px;">Registrar admin</button>
+                            </div>
+                            <div id="cash-admin-status" class="breakfast-status"></div>
+                        </section>
+                    </div>
+
+                    <div class="cash-two-col" style="grid-template-columns:1.2fr .8fr; margin-bottom:18px;">
+                        <section class="section-block" style="padding:0; overflow:hidden;">
+                            <div style="padding:24px 24px 0;">
+                                <div class="section-header">
+                                    <div>
+                                        <div class="section-title">Movimientos filtrados</div>
+                                        <div class="section-note" id="cash-fin-note">&#8212;</div>
+                                    </div>
+                                    <span class="chip" id="cash-fin-count">&#8212;</span>
+                                </div>
+                            </div>
+                            <div class="table-shell" style="border-radius:0;border-left:0;border-right:0;border-bottom:0;">
+                                <div class="table-wrap">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Hora</th>
+                                                <th>Cuenta</th>
+                                                <th>Tipo</th>
+                                                <th>Concepto</th>
+                                                <th>Monto</th>
+                                                <th>Usuario</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cash-fin-body">
+                                            <tr>
+                                                <td colspan="8" class="loading">Cargando...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title">Detalle por tipo</div>
+                                    <div class="section-note">Totales activos seg&#250;n filtros.</div>
+                                </div>
+                            </div>
+                            <div class="cash-breakdown-list" id="cash-fin-breakdown"></div>
+                        </section>
+                    </div>
+
+                    <div class="cash-two-col-even">
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title">Movimientos cancelados</div>
+                                    <div class="section-note">Auditor&#237;a de errores corregidos.</div>
+                                </div>
+                            </div>
+                            <div class="cash-breakdown-list" id="cash-fin-cancelled"></div>
+                        </section>
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title">Cierre seleccionado</div>
+                                    <div class="section-note">Estado del cierre de caja.</div>
+                                </div>
+                            </div>
+                            <div id="cash-fin-closure-box">
+                                <div class="rev-no-data">Selecciona una fecha.</div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+<!-- &#9552;&#9552; REVENUE &#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552;&#9552; -->
+    <div id="screen-revenue" class="screen">
+        <header class="inner-header">
+            <div class="inner-header-inner">
+                <div class="inner-heading">
+                    <button class="back-btn" onclick="goTo('home')">&#8592; Regresar</button>
+                    <div>
+                        <div class="inner-title">Ingresos</div>
+                        <div class="inner-sub">RMS &#183; Gestion de ingresos &#183; Finanzas</div>
+                    </div>
+                </div>
+                <div class="inner-info">
+                    <span class="chip" id="rev-run-at">Cargando...</span>
+                    <button class="btn-outline btn" onclick="runRmsNow()" style="min-height:38px;padding:0 16px;font-size:11px;">&#9654; Correr RMS</button>
+                    <button class="btn" onclick="loadRevenue()" style="min-height:38px;padding:0 16px;font-size:11px;">&#8634; Actualizar</button>
+                </div>
+            </div>
+        </header>
+        <main class="page-main">
+            <div class="rev-main-tabs">
+                <button class="rev-main-tab active" onclick="revMainTab('daily',this)">Diario</button>
+                <button class="rev-main-tab" onclick="revMainTab('monthly',this)">Mensual</button>
+                <button class="rev-main-tab" onclick="revMainTab('yearly',this)">Anual</button>
+                <button class="rev-main-tab" onclick="revMainTab('approval',this)">Aprobacion</button>
+            </div>
+            <div id="rev-error-box" style="display:none;"></div>
+
+            <!-- &#9552;&#9552; PANEL: DIARIO &#9552;&#9552; -->
+            <div class="rev-panel active" id="revpanel-daily">
+                <section class="rev-kpi-strip rev-kpi-6">
+                    <div class="rev-kpi">
+                        <div class="rev-kpi-label">Ocupacion del Mes</div>
+                        <div class="rev-kpi-value" id="kpi-occ-mes">&#8212;</div>
+                        <div class="rev-kpi-sub">Mes actual</div>
+                        <div class="rev-kpi-accent"></div>
+                    </div>
+                    <div class="rev-kpi">
+                        <div class="rev-kpi-label">ADR del Mes</div>
+                        <div class="rev-kpi-value" id="kpi-adr-mes">&#8212;</div>
+                        <div class="rev-kpi-sub">Tarifa diaria media</div>
+                        <div class="rev-kpi-accent"></div>
+                    </div>
+                    <div class="rev-kpi">
+                        <div class="rev-kpi-label">RevPAR del Mes</div>
+                        <div class="rev-kpi-value" id="kpi-revpar-mes">&#8212;</div>
+                        <div class="rev-kpi-sub">Por cuarto disponible</div>
+                        <div class="rev-kpi-accent"></div>
+                    </div>
+                    <div class="rev-kpi">
+                        <div class="rev-kpi-label">Ingresos Brutos</div>
+                        <div class="rev-kpi-value" id="kpi-gross-mes">&#8212;</div>
+                        <div class="rev-kpi-sub">Mes actual</div>
+                        <div class="rev-kpi-accent"></div>
+                    </div>
+                    <div class="rev-kpi">
+                        <div class="rev-kpi-label">Utilidad Est.</div>
+                        <div class="rev-kpi-value" id="kpi-util-mes">&#8212;</div>
+                        <div class="rev-kpi-sub">Neta del mes</div>
+                        <div class="rev-kpi-accent"></div>
+                    </div>
+                    <div class="rev-kpi">
+                        <div class="rev-kpi-label">Mix Directo</div>
+                        <div class="rev-kpi-value" id="kpi-direct-share">&#8212;</div>
+                        <div class="rev-kpi-sub">% de reservas directas</div>
+                        <div class="rev-kpi-accent"></div>
+                    </div>
+                </section>
+
+                <div class="monthly-headline-grid">
+                    <div class="ai-note-box" id="daily-ai-note">
+                        <div class="ai-note-header">
+                            <div class="ai-note-icon">&#10022;</div>
+                            <div class="ai-note-title">Que debe ver direccion hoy</div>
+                        </div>
+                        <div class="ai-note-text" id="daily-ai-text">Cargando analisis...</div>
+                    </div>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Indicadores de decision</div>
+                                <div class="section-note">Resumen inmediato del mes</div>
+                            </div>
+                        </div>
+                        <div class="finance-summary-grid">
+                            <div class="finance-summary-card">
+                                <div class="rev-mini-label">Ocupacion de equilibrio</div>
+                                <div class="rev-mini-value" id="mini-break-even-occ">&#8212;</div>
+                                <div class="rev-mini-sub">Porcentaje estimado para cubrir costos.</div>
+                            </div>
+                            <div class="finance-summary-card">
+                                <div class="rev-mini-label">Alertas pricing</div>
+                                <div class="rev-mini-value" id="mini-pricing-alerts">&#8212;</div>
+                                <div class="rev-mini-sub">Excepciones + anomalias.</div>
+                            </div>
+                            <div class="finance-summary-card">
+                                <div class="rev-mini-label">Canal dominante</div>
+                                <div class="rev-mini-value rev-mini-value-compact" id="mini-top-channel">&#8212;</div>
+                                <div class="rev-mini-sub" id="mini-top-channel-sub">Canal con mis reservas acumuladas.</div>
+                            </div>
+                            <div class="finance-summary-card">
+                                <div class="rev-mini-label">Habitacion dominante</div>
+                                <div class="rev-mini-value rev-mini-value-compact" id="mini-top-room">&#8212;</div>
+                                <div class="rev-mini-sub" id="mini-top-room-sub">Tipo con mayor ingreso bruto.</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="decision-grid">
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Presion de demanda</div>
+                                <div class="section-note">Proximos 60 dias</div>
+                            </div>
+                        </div>
+                        <div class="chart-wrap">
+                            <canvas id="chart-occ">
+                            </canvas>
+                        </div>
+                        <div class="rev-legend" style="margin-top:14px;">
+                            <div class="rev-legend-item">
+                                <div class="rev-legend-dot" style="background:var(--ok)"></div>
+                                Baja &lt;45%
+                            </div>
+                            <div class="rev-legend-item">
+                                <div class="rev-legend-dot" style="background:var(--low)"></div>
+                                Media 45-65%
+                            </div>
+                            <div class="rev-legend-item">
+                                <div class="rev-legend-dot" style="background:var(--rev-gold)"></div>
+                                Alta 65-82%
+                            </div>
+                            <div class="rev-legend-item">
+                                <div class="rev-legend-dot" style="background:var(--critical)"></div>
+                                Muy alta &gt;82%
+                            </div>
+                        </div>
+                    </section>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Acciones sugeridas</div>
+                                <div class="section-note">Lectura ejecutiva</div>
+                            </div>
+                        </div>
+                        <div class="decision-list" id="owner-actions-box">
+                            <div class="rev-no-data">Cargando acciones...</div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="rev-two-col">
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Mix de canales</div>
+                                <div class="section-note">Participacion de reservas</div>
+                            </div>
+                        </div>
+                        <div id="rev-channel-mix">
+                            <div class="rev-no-data">Cargando canales...</div>
+                        </div>
+                    </section>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Performance por tipo de habitacion</div>
+                                <div class="section-note">ADR, neto y noches habitacion</div>
+                            </div>
+                        </div>
+                        <div id="roomtype-performance">
+                            <div class="rev-no-data">Cargando tipos de habitacion...</div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="rev-two-col">
+                    <section class="section-block" id="high-pressure-section">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Fechas de alta presion</div>
+                                <div class="section-note">Proximos 7 dias</div>
+                            </div>
+                        </div>
+                        <div id="high-pressure-list">
+                            <div class="rev-no-data">Sin fechas de alta presion proximas.</div>
+                        </div>
+                    </section>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Alertas del pricing engine</div>
+                                <div class="section-note">Excepciones y anomalias</div>
+                            </div>
+                        </div>
+                        <div id="pricing-alerts-box">
+                            <div class="rev-no-data">Cargando alertas...</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- &#9552;&#9552; PANEL: APROBACIÃ“N &#9552;&#9552; -->
+            <div class="rev-panel" id="revpanel-approval">
+                <section class="section-block">
+                    <div class="section-header">
+                        <div>
+                            <div class="section-title">Tarifas pendientes de aprobacion</div>
+                            <div class="section-note" id="approval-count-note">Cargando...</div>
+                        </div>
+                        <div class="approval-toolbar">
+                            <button class="btn" onclick="openApproveAllModal()" style="min-height:38px;padding:0 16px;font-size:11px;">Aprobar todas</button>
+                            <div class="filters" id="approval-room-filter"></div>
+                        </div>
+                    </div>
+                    <div class="info-box" style="margin-bottom:16px;">
+                        <strong>Aprobacion de tarifas:</strong>
+                         revisa fecha, habitacion, temporada, precio base, precio actual, precios recomendados, presion de demanda y estado de envio a Cloudbeds.
+                                        
+                    </div>
+                    <div id="approval-list">
+                        <div class="rev-no-data">Cargando tarifas...</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- &#9552;&#9552; PANEL: MENSUAL &#9552;&#9552; -->
+            <div class="rev-panel" id="revpanel-monthly">
+                <div class="rev-sub-tabs">
+                    <button class="rev-sub-tab active" onclick="revSubTab('monthly','summary',this)">Resumen</button>
+                    <button class="rev-sub-tab" onclick="revSubTab('monthly','forecast',this)">Pronostico</button>
+                    <button class="rev-sub-tab" onclick="revSubTab('monthly','scatter',this)">Scatterplot</button>
+                </div>
+
+                <div class="rev-sub-panel active" id="monthly-summary">
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Lectura gerencial mensual</div>
+                                <div class="section-note">Real / oficial / forecast segun datos disponibles</div>
+                            </div>
+                        </div>
+                        <div class="finance-summary-grid" id="monthly-exec-summary">
+                            <div class="rev-no-data" style="grid-column:1/-1">Cargando resumen mensual...</div>
+                        </div>
+                    </section>
+                    <div class="rev-two-col">
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title">Ingresos vs utilidad</div>
+                                    <div class="section-note">Meses recientes</div>
+                                </div>
+                            </div>
+                            <div class="chart-wrap-tall">
+                                <canvas id="chart-monthly-rev">
+                                </canvas>
+                            </div>
+                        </section>
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title">RevPAR vs Ocupacion</div>
+                                    <div class="section-note">Todos los meses en WEB_FINANCE_MONTHLY</div>
+                                </div>
+                            </div>
+                            <div class="chart-wrap-tall">
+                                <canvas id="chart-monthly-occadr">
+                                </canvas>
+                            </div>
+                        </section>
+                    </div>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Tabla gerencial mensual</div>
+                                <div class="section-note">Lo importante para decidir</div>
+                            </div>
+                        </div>
+                        <div class="table-shell">
+                            <div class="table-wrap">
+                                <table class="executive-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Mes</th>
+                                            <th>Temporada</th>
+                                            <th>Ocupacion</th>
+                                            <th>ADR</th>
+                                            <th>Ingresos</th>
+                                            <th>Utilidad</th>
+                                            <th>Margen</th>
+                                            <th>Booking</th>
+                                            <th>Directa</th>
+                                            <th>Expedia</th>
+                                            <th>Otros</th>
+                                            <th>Reporte</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="monthly-exec-table">
+                                        <tr>
+                                            <td colspan="12" class="loading">Cargando...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="rev-sub-panel" id="monthly-forecast">
+                    <div class="month-cards" id="monthly-forecast-cards">
+                        <div class="rev-no-data">Cargando meses 2026...</div>
+                    </div>
+                </div>
+
+                <div class="rev-sub-panel" id="monthly-scatter">
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Scatterplot mensual</div>
+                                <div class="section-note">Explora relaciones entre columnas numericas</div>
+                            </div>
+                        </div>
+                        <div class="scatter-layout">
+                            <div class="scatter-controls">
+                                <div>
+                                    <label class="modal-label" for="scatter-x">Variable X</label>
+                                    <select id="scatter-x" class="breakfast-select" onchange="renderMonthlyScatter()"></select>
+                                </div>
+                                <div>
+                                    <label class="modal-label" for="scatter-y">Variable Y</label>
+                                    <select id="scatter-y" class="breakfast-select" onchange="renderMonthlyScatter()"></select>
+                                </div>
+                                <div>
+                                    <label class="modal-label" for="scatter-year">Filtro año</label>
+                                    <select id="scatter-year" class="breakfast-select" onchange="renderMonthlyScatter()"></select>
+                                </div>
+                                <div>
+                                    <label class="modal-label" for="scatter-report">Filtro reporte</label>
+                                    <select id="scatter-report" class="breakfast-select" onchange="renderMonthlyScatter()">
+                                        <option value="all">Todos</option>
+                                        <option value="with_report">Solo con reporte oficial</option>
+                                        <option value="without_report">Solo sin reporte oficial</option>
+                                    </select>
+                                </div>
+                                <div class="info-box">
+                                    <strong>Uso:</strong>
+                                     elige dos columnas numericas para visualizar correlacion. Ideal para ver ocupacion vs ADR, ADR vs utilidad, o noches habitacion vs ingresos.
+                                </div>
+                            </div>
+                            <div>
+                                <div class="chart-wrap-tall">
+                                    <canvas id="chart-monthly-scatter">
+                                    </canvas>
+                                </div>
+                                <div class="scatter-stat-grid">
+                                    <div class="scatter-stat">
+                                        <div class="scatter-stat-label">Correlacion</div>
+                                        <div class="scatter-stat-value" id="scatter-corr">&#8212;</div>
+                                    </div>
+                                    <div class="scatter-stat">
+                                        <div class="scatter-stat-label">Observaciones</div>
+                                        <div class="scatter-stat-value" id="scatter-n">&#8212;</div>
+                                    </div>
+                                    <div class="scatter-stat">
+                                        <div class="scatter-stat-label">Pendiente</div>
+                                        <div class="scatter-stat-value" id="scatter-slope">&#8212;</div>
+                                    </div>
+                                </div>
+                                <div class="section-block" style="margin-top:16px;padding:18px;">
+                                    <div class="section-header" style="margin-bottom:12px;padding-bottom:10px;">
+                                        <div>
+                                            <div class="section-title" style="font-size:22px;">Comparacion anual de variable</div>
+                                            <div class="section-note">Promedio, desviacion estandar y cambio por año</div>
+                                        </div>
+                                    </div>
+                                    <div id="scatter-year-summary">
+                                        <div class="rev-no-data">Selecciona variables para ver el comparativo anual.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- &#9552;&#9552; PANEL: ANUAL &#9552;&#9552; -->
+            <div class="rev-panel" id="revpanel-yearly">
+                <div class="rev-sub-tabs">
+                    <button class="rev-sub-tab active" onclick="revSubTab('yearly','current',this)">Vision actual</button>
+                    <button class="rev-sub-tab" onclick="revSubTab('yearly','comparison',this)">Comparacion entre años</button>
+                </div>
+                <div class="rev-sub-panel active" id="yearly-current">
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Vision actual del año</div>
+                                <div class="section-note">Solo meses con reporte oficial</div>
+                            </div>
+                        </div>
+                        <div class="finance-summary-grid" id="yearly-exec-summary">
+                            <div class="rev-no-data" style="grid-column:1/-1">Cargando resumen anual...</div>
+                        </div>
+                    </section>
+                    <div class="rev-two-col">
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title" id="yearly-projection-title">Meses oficiales del año</div>
+                                    <div class="section-note">Solo meses con reporte</div>
+                                </div>
+                            </div>
+                            <div class="yearly-grid" id="yearly-months-grid">
+                                <div class="rev-no-data">Cargando proyeccion anual...</div>
+                            </div>
+                            <div style="margin-top:18px;" id="yearly-projection-attachment">
+                                <div class="rev-no-data">Cargando adjunto comparativo...</div>
+                            </div>
+                        </section>
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title">Enfoque de direccion</div>
+                                    <div class="section-note">Donde mirar primero</div>
+                                </div>
+                            </div>
+                            <div class="owner-focus-grid" id="yearly-focus-box">
+                                <div class="rev-no-data" style="grid-column:1/-1">Cargando...</div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="rev-two-col">
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title">Canales</div>
+                                    <div class="section-note">Contribucion e ingresos</div>
+                                </div>
+                            </div>
+                            <div id="yearly-channel-summary">
+                                <div class="rev-no-data">Cargando canales...</div>
+                            </div>
+                        </section>
+                        <section class="section-block">
+                            <div class="section-header">
+                                <div>
+                                    <div class="section-title">Tipos de habitacion</div>
+                                    <div class="section-note">Que cuartos sostienen el negocio</div>
+                                </div>
+                            </div>
+                            <div id="yearly-roomtype-summary">
+                                <div class="rev-no-data">Cargando tipos de habitacion...</div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                <div class="rev-sub-panel" id="yearly-comparison">
+                    <div id="year-summary-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:0;"></div>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">ADR por mes</div>
+                                <div class="section-note">Comparacion año a año</div>
+                            </div>
+                        </div>
+                        <div class="chart-wrap-tall">
+                            <canvas id="chart-ycomp-adr">
+                            </canvas>
+                        </div>
+                    </section>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Ocupacion % por mes</div>
+                                <div class="section-note">Comparacion año a año</div>
+                            </div>
+                        </div>
+                        <div class="chart-wrap-tall">
+                            <canvas id="chart-ycomp-occ">
+                            </canvas>
+                        </div>
+                    </section>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">RevPAR por mes</div>
+                                <div class="section-note">Ingresos por cuarto disponible</div>
+                            </div>
+                        </div>
+                        <div class="chart-wrap-tall">
+                            <canvas id="chart-ycomp-revpar">
+                            </canvas>
+                        </div>
+                    </section>
+                    <section class="section-block">
+                        <div class="section-header">
+                            <div>
+                                <div class="section-title">Ingresos totales por año</div>
+                                <div class="section-note">Brutos vs Utilidad</div>
+                            </div>
+                        </div>
+                        <div class="chart-wrap">
+                            <canvas id="chart-ycomp-gross">
+                            </canvas>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<!-- ══ APPROVAL MODAL ═════════════════════════════════════════ -->
+<div id="approval-modal" class="modal-overlay" style="display:none;" onclick="closeModalOnOverlay(event)">
+    <div class="modal-box">
+        <div class="modal-title" id="modal-title">Confirmar acción</div>
+        <div class="modal-sub" id="modal-sub"></div>
+        <div class="modal-field">
+            <label class="modal-label" for="modal-notes">Notas (opcional)</label>
+            <input class="input" type="text" id="modal-notes" placeholder="Razón o comentario...">
+        </div>
+        <div class="modal-actions">
+            <button class="btn-approve" id="modal-confirm-btn" onclick="confirmApproval()">Confirmar</button>
+            <button class="btn-outline btn" onclick="closeModal()" style="min-height:34px;padding:0 16px;font-size:11px;">Cancelar</button>
+        </div>
+        <div class="modal-saving" id="modal-saving"></div>
+    </div>
+</div>
+
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
